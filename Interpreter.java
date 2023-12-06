@@ -26,16 +26,16 @@ public class Interpreter {
                 continue;
             }
             if (character == '+' || character == '-' || character == '*' || character == '/') {
-                return new Token("OPERATOR", String.valueOf(character));
+                return new Token("OPERADOR", String.valueOf(character));
             }
             if (Character.isDigit(character)) {
-                return new Token("NUMBER", String.valueOf(character));
+                return new Token("NUMERO", String.valueOf(character));
             }
             if (character == ')') {
-                return new Token("RIGHT_PAREN", String.valueOf(character));
+                return new Token("PARENT_DIREITO", String.valueOf(character));
             }
             if (character == '(') {
-                return new Token("LEFT_PAREN", String.valueOf(character));
+                return new Token("PARENT_ESQUERDO", String.valueOf(character));
             }
             error();
         }
@@ -54,9 +54,9 @@ public class Interpreter {
 
     public int parse() {
         while (true) {
-            if (tokens.get(0).tokenType.equals("NUMBER")) {
+            if (tokens.get(0).tokenType.equals("NUMERO")) {
                 return Integer.parseInt(tokens.remove(0).value);
-            } else if (tokens.get(0).tokenType.equals("OPERATOR")) {
+            } else if (tokens.get(0).tokenType.equals("OPERADOR")) {
                 String op = tokens.remove(0).value;
                 int a = parse();
                 int b = parse();
@@ -69,7 +69,7 @@ public class Interpreter {
                 } else if (op.equals("/")) {
                     return a / b;
                 }
-            } else if (tokens.get(0).tokenType.equals("LEFT_PAREN")) {
+            } else if (tokens.get(0).tokenType.equals("PARENT_ESQUERDO")) {
                 tokens.remove(0);
                 int a = parse();
                 tokens.remove(0);
@@ -84,7 +84,7 @@ public class Interpreter {
     public void interpret() {
         lex();
         int result = parse();
-        System.out.println("Result: " + result);
+        System.out.println(result);
     }
     
     public static void main(String[] args) {
