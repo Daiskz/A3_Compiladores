@@ -16,8 +16,8 @@ class Interpreter {
         this.tokens = []
     }
 
-    getError(){
-        throw new Error("Expresssão inválida")
+    getError(error){
+        throw new Error(`Expresssão inválida: ${error}`)
     }
 
     getResult(result){
@@ -33,9 +33,12 @@ class Interpreter {
         if(char.match(regex)) return this.tokens.push(new Token('NUMBER', char));
         if(char === '(') return this.tokens.push(new Token('RIGHT_PARENTHESIS', char));
         if(char === ')') return this.tokens.push(new Token('LEFT_PARENTHESIS', char));
+        return this.getError(`Caractére ${char} inválido!`);
     }
 
     parser(){
+        console.log(`Tokens Gerados:`)
+        console.log(this.tokens)
         let chunks = []
         const operatorsIndex = []
         let chunkCount = 0
@@ -75,8 +78,8 @@ class Interpreter {
         // impede que a expressão comece com / ou *
         let allowedOperators = operators.filter((operator) => operator !== '-' && operator !== '+')
 
-        if(firstChar == ")" || allowedOperators.includes(firstChar)) return this.getError()
-        if(lastChar == "(" || operators.includes(lastChar)) return this.getError()
+        if(firstChar == ")" || allowedOperators.includes(firstChar)) return this.getError(`A expressão não pode começar com ${firstChar}!`)
+        if(lastChar == "(" || operators.includes(lastChar)) return this.getError(`A expressão não pode terminar com ${lastChar}!`)
 
         for (let i = 0; i < input.length; i++) {
             if(input[i] == "(") {
@@ -87,7 +90,7 @@ class Interpreter {
             }            
         }
         // verifica se a quantidade de parenteses são equivalentes
-        return leftParenthesis!=rightParenthesis ? this.getError() : true
+        return leftParenthesis!=rightParenthesis ? this.getError('Parenteses Incompletos!') : true
     }
 
     lex(){
@@ -97,7 +100,7 @@ class Interpreter {
                 let char = this.input.charAt(i);
                 this.getNextToken(char);
             }
-            if(this.tokens.length<=0) return this.getError();
+            if(this.tokens.length<=0) return this.getError('Expressão sem valores válidos!');
         }
     }
 
