@@ -40,7 +40,7 @@ class Interpreter {
     }
 
     getNextToken(char){
-        if(char === '') return
+        if(char === '' || char === ' ') return
         if(char === '.') return this.tokens.push(new Token('DOT', char));
         if(operators.includes(char)) return this.tokens.push(new Token('OPERATOR', char));
         if(char.match(regex)) return this.tokens.push(new Token('NUMBER', char));
@@ -55,11 +55,12 @@ class Interpreter {
         const operatorsIndex = []
         let chunkCount = 0
 
-        this.tokens.forEach(token => {
-            if(token.type === "OPERATOR"){
-                operatorsIndex.push(this.tokens.indexOf(token))
+        for (let i = 0; i < this.tokens.length; i++) {
+            if(this.tokens[i].type === 'OPERATOR'){
+                if(this.tokens[i+1].type === "OPERATOR") return this.getError("Não são permitidos 2 operadores seguidos")
+                operatorsIndex.push(this.tokens.indexOf(this.tokens[i]))
             }
-        });
+        }
 
         for (let i = 0; i <= operatorsIndex.length; i++) {
             if(this.tokens.slice(chunkCount, operatorsIndex[i]).length > 0){
@@ -86,7 +87,7 @@ class Interpreter {
         
         let leftParenthesis = 0
         let rightParenthesis = 0
-
+        
         // impede que a expressão comece com / ou *
         let allowedOperators = operators.filter((operator) => operator !== '-' && operator !== '+')
 
