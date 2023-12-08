@@ -16,16 +16,29 @@ class Interpreter {
         this.tokens = []
     }
 
+    // error
     getError(error){
         throw new Error(`Expresssão inválida: ${error}`)
     }
 
-    getResult(result){
-        console.log(`Input: ${this.input}`)
-        console.log(`Result: ${result}`)
+    // resultado
+    getResult(expression){
+        const result = eval(expression)
+        console.log(`Resultado: ${result}`)
     }
 
     // analisador lexico
+    lex(){
+        for (let i = 0; i < this.input.length; i++) {
+            let char = this.input.charAt(i);
+            this.getNextToken(char);
+        }
+        if(this.tokens.length<=0) return this.getError('Expressão sem valores válidos!');
+        console.log(`Tokens Gerados:`)
+        console.log(this.tokens)
+        this.parser();
+    }
+
     getNextToken(char){
         if(char === '') return
         if(char === '.') return this.tokens.push(new Token('DOT', char));
@@ -33,12 +46,11 @@ class Interpreter {
         if(char.match(regex)) return this.tokens.push(new Token('NUMBER', char));
         if(char === '(') return this.tokens.push(new Token('RIGHT_PARENTHESIS', char));
         if(char === ')') return this.tokens.push(new Token('LEFT_PARENTHESIS', char));
-        return this.getError(`Caractére ${char} inválido!`);
+        return this.getError(`Caractére '${char}' inválido!`);
     }
-
+    
+    // analisador sintatico
     parser(){
-        console.log(`Tokens Gerados:`)
-        console.log(this.tokens)
         let chunks = []
         const operatorsIndex = []
         let chunkCount = 0
@@ -62,15 +74,15 @@ class Interpreter {
             }
         }
         let expression = chunks.join('')
-
-        this.getResult(eval(expression))
+        console.log(`Expressão gerada: ${expression}`)
+        this.checkSintax(expression);
 
     }
 
     // analisador semantico
-    checkSintax(input){
-        let firstChar = input.charAt(0)
-        let lastChar = input.charAt(input.length-1)
+    checkSintax(expression){
+        let firstChar = expression.charAt(0)
+        let lastChar = expression.charAt(expression.length-1)
         
         let leftParenthesis = 0
         let rightParenthesis = 0
@@ -81,33 +93,21 @@ class Interpreter {
         if(firstChar == ")" || allowedOperators.includes(firstChar)) return this.getError(`A expressão não pode começar com ${firstChar}!`)
         if(lastChar == "(" || operators.includes(lastChar)) return this.getError(`A expressão não pode terminar com ${lastChar}!`)
 
-        for (let i = 0; i < input.length; i++) {
-            if(input[i] == "(") {
+        for (let i = 0; i < expression.length; i++) {
+            if(expression[i] == "(") {
                 leftParenthesis++
             }
-            if(input[i] == ")") {
+            if(expression[i] == ")") {
                 rightParenthesis++
             }            
         }
         // verifica se a quantidade de parenteses são equivalentes
-        return leftParenthesis!=rightParenthesis ? this.getError('Parenteses Incompletos!') : true
-    }
-
-    lex(){
-        let check = this.checkSintax(this.input)
-        if(check){
-            for (let i = 0; i < this.input.length; i++) {
-                let char = this.input.charAt(i);
-                this.getNextToken(char);
-            }
-            if(this.tokens.length<=0) return this.getError('Expressão sem valores válidos!');
-        }
+        return leftParenthesis!=rightParenthesis ? this.getError('Parenteses Incompletos!') : this.getResult(expression)
     }
 
     interpret(){
         try {
             this.lex();
-            this.parser();            
         } catch (error) {
             console.log(error)
         }
